@@ -1,14 +1,10 @@
 
 
 # Imports
-from Control.Create_Activity import Create_Activity
+
 
 # This is a public class
-class Set_End(Create_Activity):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.eventEnd = ""
+class Set_End():
     
     # Getter Method
     def getEventEnd(self):
