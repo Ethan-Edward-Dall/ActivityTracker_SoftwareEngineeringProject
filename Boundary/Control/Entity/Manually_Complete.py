@@ -1,14 +1,10 @@
 
 
 # Imports
-from Control.Complete_Event import Complete_Event
+
 
 # This is a public class
-class Manually_Complete(Complete_Event):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.event = ""
+class Manually_Complete():
     
     # Getter Method
     def getEvent(self):

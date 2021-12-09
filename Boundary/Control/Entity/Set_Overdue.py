@@ -1,14 +1,9 @@
 
 
 # Imports
-from Control.Complete_Event import Complete_Event
 
 # This is a public class
-class Set_Overdue(Complete_Event):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.event = ""
+class Set_Overdue():
     
     # Getter Method
     def getEvent(self):

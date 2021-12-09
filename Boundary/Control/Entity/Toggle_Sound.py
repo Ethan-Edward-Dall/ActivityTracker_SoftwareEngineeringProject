@@ -1,10 +1,9 @@
 
 
 # Imports
-from Control.Alter_Settings import Alter_Settings
 
 # This is a public class
-class Toggle_Sound(Alter_Settings):
+class Toggle_Sound:
     
     # Initializer Method 
     def __init__(self):

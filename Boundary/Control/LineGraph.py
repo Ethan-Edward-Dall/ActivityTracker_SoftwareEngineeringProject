@@ -1,10 +1,10 @@
 
 
 # Imports
-from Boundary.UserInterface import UserInterface
+
 
 # This is a public class
-class LineGraph(UserInterface):
+class LineGraph():
     
     # Variables
     

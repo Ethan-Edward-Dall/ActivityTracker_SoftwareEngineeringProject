@@ -1,18 +1,13 @@
 
 
 # Imports
-from Control.Alter_Settings import Alter_Settings
 
 # This is a public Class
-class Adjust_Volume(Alter_Settings):
+class Adjust_Volume:
     
     # Final Variables
     VOLUME_MAX = 100
     VOLUME_MIN = 1
-
-    # Initializer Method 
-    def __init__(self):
-        self.volLevel = 50
     
     # Getter Method
     def getVolume(self):

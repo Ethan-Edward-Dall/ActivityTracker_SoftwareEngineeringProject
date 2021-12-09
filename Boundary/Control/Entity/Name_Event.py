@@ -1,14 +1,9 @@
 
 
 # Imports
-from Control.Create_Activity import Create_Activity
 
 # This is a public class
-class Name_Event(Create_Activity):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.eventName = ""
+class Name_Event():
     
     # Getter Method
     def getEventName(self):

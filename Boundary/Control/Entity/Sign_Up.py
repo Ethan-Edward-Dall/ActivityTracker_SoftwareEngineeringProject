@@ -1,15 +1,8 @@
-
-
 # Imports
-from Control.Log_In import Log_In
+
 
 # This is a public class
-class Authentication(Log_In):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.password = ""
-        self.username = ""
+class Sign_Up():
     
     # Getter Method
     def getPassword(self):
@@ -27,8 +20,8 @@ class Authentication(Log_In):
     def setUser(self, username):
         self.username = username
 
-    # Check the user information
-    def Check(self, username, password):
+    # Signup Method takes the inputed username and password and add it into the database table
+    def signup(self, username, password):
         pass
 
 

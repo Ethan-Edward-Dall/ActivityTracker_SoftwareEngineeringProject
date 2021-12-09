@@ -1,14 +1,10 @@
+
+
 # Imports
-from Control.Log_In import Log_In
 
 # This is a public class
-class Sign_Up(Log_In):
-    
-    # Initializer Method 
-    def __init__(self):
-        self.password = ""
-        self.username = ""
-    
+class Authentication():
+
     # Getter Method
     def getPassword(self):
         return self.password
@@ -25,8 +21,15 @@ class Sign_Up(Log_In):
     def setUser(self, username):
         self.username = username
 
-    # Signup Method takes the inputed username and password and add it into the database table
-    def signup(self, username, password):
-        pass
+    def setErr(self, message):
+        self.errLbl.configure(text = message, foreground='red')
 
+    # Check the user information
+    def CheckInfo(username, password):
+        print("Checking info...")
 
+    # Check the password
+    def CheckPass(self, password):
+        if(len(password) > 29):
+            return False
+        return True
