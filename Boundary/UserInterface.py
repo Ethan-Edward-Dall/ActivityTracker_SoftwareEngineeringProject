@@ -21,7 +21,7 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         tk.Tk.__init__(self, *args, **kwargs)
 
         self.title("Activity Tracker")
-        self.geometry("425x450")
+        self.geometry("450x350")
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
 
@@ -81,54 +81,93 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         self.deleteWidgets()
 
         # Frames
-        masterFrame = tk.Frame(master=self).grid(column=0, row=0, sticky='nesw')
-        activeFrame = tk.Frame(masterFrame).grid(column=0, row=1, columnspan=3, sticky='nesw')
-        createActivityFrame = tk.Frame(masterFrame).grid(column=0, row=2, columnspan=3, sticky='nesw')
+        self.masterFrame = tk.Frame(master=self).grid(column=0, row=0, sticky='nesw')
+        self.activeFrame = tk.Frame(self.masterFrame).grid(column=0, row=1, columnspan=3, sticky='nesw')
+        self.createActivityFrame = tk.Frame(self.masterFrame).grid(column=0, row=2, columnspan=3, sticky='nesw')
 
         # Scrollbar
-        scrollbar = tk.Scrollbar(activeFrame)
-        scrollbar.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w')
+        self.scrollbar = tk.Scrollbar(self.activeFrame)
+        self.scrollbar.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w')
 
         # Add to scrollList
-        scrollList = tk.Listbox(activeFrame, yscrollcommand= scrollbar.set, height=10, width=70, )
-        activeList= self.returnActivities(Sign_In.returnUser, Sign_In.returnPass)
-        scrollList.insert(END, activeList)
-        scrollList.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='n')
-        scrollbar.config(command= scrollList.yview)
+        self.scrollList = tk.Listbox(self.activeFrame, yscrollcommand= self.scrollbar.set, height=10, width=60)
+        self.activeList= self.returnActivities(Sign_In.returnUser, Sign_In.returnPass)
+        self.scrollList.insert(END, self.activeList)
+        self.scrollList.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w', padx=20)
+        self.scrollbar.config(command= self.scrollList.yview)
 
         # Labels
-        colLabelsLbl = tk.Label(activeFrame, text="Event Name | Start Time | End Time | Level of Importance | Desc.",
+        self.colLabelsLbl = tk.Label(self.activeFrame, text="Event Name | Start Time | End Time | Level of Importance | Desc.",
                                  font=("calibri", 10, 'bold'))
-        colLabelsLbl.grid(column=0, row=3, columnspan=4, sticky='nesw')
+        self.colLabelsLbl.grid(column=0, row=3, columnspan=5, sticky='w', padx=20)
 
-        titleLbl = tk.Label(masterFrame, text="Activity Screen", font=("calibri", 10, 'bold'))
-        titleLbl.grid(column=2, row=0)
+        self.titleLbl = tk.Label(self.masterFrame, text="Activity Screen", font=("calibri", 10, 'bold'))
+        self.titleLbl.grid(column=2, row=0)
 
         today = date.today()
         currDate = today.strftime("%B %d, %Y")
-        dateLbl = tk.Label(masterFrame, text=currDate, font=("calibri", 10))
-        dateLbl.grid(column=2, row=1, sticky='nesw')
+        self.dateLbl = tk.Label(self.masterFrame, text=currDate, font=("calibri", 10))
+        self.dateLbl.grid(column=2, row=1, sticky='nesw')
 
-        actActivitiesLbl = tk.Label(masterFrame, text="Active Activities", font=("calibri", 10, 'bold'))
-        actActivitiesLbl.grid(column=2, row=2, sticky='nesw')
+        self.actActivitiesLbl = tk.Label(self.masterFrame, text="Active Activities", font=("calibri", 10, 'bold'))
+        self.actActivitiesLbl.grid(column=2, row=2, sticky='nesw')
 
-        createActivityLbl = tk.Label(masterFrame, text="Create New Activity", font=("calibri", 10, 'bold'))
-        createActivityLbl.grid(column=2, row=7, sticky='nesw')
-
-        # Buttons
-        overdueBtn = tk.Button(masterFrame, text="Overdue\n Activities", command=lambda: self.Overdue_Event(), font=("calibri", 10, 'bold'))
-        overdueBtn.grid(column=3, row=1, rowspan=2, sticky='nesw')
-
-        completeBtn = tk.Button(masterFrame, text="Completed\n Activities", command=lambda: self.Complete_Event(), font=("calibri", 10, 'bold'))
-        completeBtn.grid(column=0, row=1, columnspan=2, rowspan=2, sticky='w')
-
-        alterSettingsBtn = tk.Button(masterFrame, text="Settings", command=lambda: self.Alter_Settings(), font=("calibri", 10, 'bold'))
-        alterSettingsBtn.grid(column=4, row=1, rowspan=2, sticky='nesw')
+        self.createActivityLbl = tk.Label(self.masterFrame, text="Create New Activity", font=("calibri", 10, 'bold'))
+        self.createActivityLbl.grid(column=2, row=7, sticky='nesw')
 
         # Text Entry
+        self.eventNameTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="eventName", font=("calibri", 10))
+        self.eventNameTxe.insert(END, "[Event Name]")
+        self.eventNameTxe.grid(column=0, row=8, sticky='nesw')
 
+        self.startTimeTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="startTime", font=("calibri", 10))
+        self.startTimeTxe.insert(END, "[Start Time]")
+        self.startTimeTxe.grid(column=2, row=8, sticky='nesw')
 
-        # Dropbox
+        self.endTimeTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="endTime", font=("calibri", 10))
+        self.endTimeTxe.insert(END, "[End Time]")
+        self.endTimeTxe.grid(column=3, row=8, sticky='nesw')
+
+        self.descTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="desc", font=("calibri", 10))
+        self.descTxe.insert(END, "[Description (option)]")
+        self.descTxe.grid(column=0, row=9, columnspan=4, rowspan=2, sticky='nesw')
+
+        # Options Menu
+        options = ["Low", "Average", "High"]
+
+        self.impLvl = tk.StringVar()
+        self.impLvl.set("Low")
+        self.impDrop = tk.OptionMenu(self.createActivityFrame, self.impLvl, *options)
+        self.impDrop.grid(column=4, row=8, sticky='nesw')
+
+        # Buttons
+        self.overdueBtn = tk.Button(self.masterFrame, text="Overdue\n Activities", command=lambda: self.Overdue_Event(), font=("calibri", 10, 'bold'))
+        self.overdueBtn.grid(column=3, row=1, rowspan=2, sticky='nesw')
+
+        self.completeBtn = tk.Button(self.masterFrame, text="Completed\n Activities", command=lambda: self.Complete_Event(), font=("calibri", 10, 'bold'))
+        self.completeBtn.grid(column=0, row=1, columnspan=2, rowspan=2, sticky='w')
+
+        self.alterSettingsBtn = tk.Button(self.masterFrame, text="Settings", command=lambda: self.Alter_Settings(), font=("calibri", 10, 'bold'))
+        self.alterSettingsBtn.grid(column=4, row=1, rowspan=2, sticky='nesw')
+
+        self.createEvent = tk.Button(self.createActivityFrame, text="Create Event", 
+                                command=lambda: self.addNewEvent(), 
+                                font=("calibri", 10, 'bold'))
+        self.createEvent.grid(column=4, row=9, sticky='nesw')
+
+        self.endEvent = tk.Button(self.activeFrame, text="End Event", command=lambda: self.endSelectedEvent(), font=("calibri", 10, 'bold'))
+        self.endEvent.grid(column=4, row=4, rowspan=3, sticky='nes')
+
+    # Adds the created event into Active Activities
+    def addNewEvent(self):
+        eventName = self.eventNameTxe.get()
+        startTime = self.startTimeTxe.get()
+        endTime = self.endTimeTxe.get()
+        lvlImp = self.impLvl.get()
+        description = self.descTxe.get()
+        newActivity = [str(eventName), str(startTime), str(endTime), str(lvlImp), str(description)]
+        self.scrollList.insert(END, ("   |   ".join(newActivity)))
+
 
     # Add to ListView
     def appendList(scrollList, event):
