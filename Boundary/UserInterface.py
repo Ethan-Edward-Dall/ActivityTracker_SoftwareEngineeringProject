@@ -2,7 +2,10 @@
 from datetime import date
 import tkinter as tk
 import sqlite3 as sql
-from tkinter.constants import END
+from tkinter.constants import END, HORIZONTAL, Y
+
+import matplotlib
+
 from Control.Sign_In import Authentication
 from Control.Alter_Settings import Alter_Settings
 from Control.Complete_Event import Complete_Event
@@ -37,11 +40,42 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         # Delete Frame
         self.deleteWidgets()
 
-        titleLbl = tk.Label(self, text="Settings")
-        titleLbl.grid(column=1, row=0)
+        # Labels
+        self.titleLbl = tk.Label(self, text="Settings", font=('calabri', 15, "bold"))
+        self.titleLbl.grid(column=1, row=0, sticky='w')
 
-        submitBtn = tk.Button(self, text="Back", command=lambda: self.Create_Activity())
-        submitBtn.grid(column=0, row=0)
+        self.notifVolLbl = tk.Label(self, text="Notification Volume", font=('calabri', 10, "bold"))
+        self.notifVolLbl.grid(column=1, row=2, stick='w')
+
+        self.notifSoundLbl = tk.Label(self, text="Notification Sound", font=('calabri', 10, "bold"))
+        self.notifSoundLbl.grid(column=1, row=3, sticky='w')
+
+        self.fileLocationLbl = tk.Label(self, text="File location and installation name", font=('calabri', 10), bd=4)
+        self.fileLocationLbl.grid(column=1, row=1, sticky='w')
+
+        # Buttons
+        self.submitBtn = tk.Button(self, text="Back", command=lambda: self.Create_Activity())
+        self.submitBtn.grid(column=0, row=0, sticky='nesw')
+
+        self.onBtn = tk.Button(self, text="On", command=lambda: self.toggle(), relief="raised")
+        self.onBtn.grid(column=2, row=3, sticky='nesw')
+
+        self.offBtn = tk.Button(self, text="Off", command=lambda: self.toggle(), relief="sunken")
+        self.offBtn.grid(column=3, row=3, sticky='nesw')
+
+        # Scale
+        self.volScale = tk.Scale(self, to=100, orient=HORIZONTAL)
+        self.volScale.grid(column=2, row=2, columnspan=2, sticky='nesw')
+
+    def toggle(self):
+        if self.onBtn.config('relief')[-1] == "sunken":
+            self.onBtn.config(relief="raised")
+        else:
+            self.onBtn.config(relief="sunken")
+        if self.offBtn.config('relief')[-1] == "sunken":
+            self.offBtn.config(relief="raised")
+        else:
+            self.offBtn.config(relief="sunken")
 
 
     """Complete_Event page handles events that are manually completed and overdue
@@ -54,11 +88,43 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         # Delete Frame
         self.deleteWidgets()
 
-        titleLbl = tk.Label(self, text="Completed Events")
-        titleLbl.grid(column=1, row=0)
+        # Frames
+        self.masterFrame = tk.Frame(master=self).grid(column=0, row=0, sticky='nesw')
+        self.activeFrame = tk.Frame(self.masterFrame).grid(column=1, row=1, columnspan=3, sticky='nesw')
 
-        submitBtn = tk.Button(self, text="Back", command=lambda: self.Create_Activity())
-        submitBtn.grid(column=0, row=0)
+        # Scrollbar
+        self.scrollbar = tk.Scrollbar(self.activeFrame)
+        self.scrollbar.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w')
+
+        # Add to scrollList
+        self.scrollList = tk.Listbox(self.activeFrame, yscrollcommand= self.scrollbar.set, height=10, width=60)
+        self.activeList= self.returnActivities(Sign_In.returnUser, Sign_In.returnPass)
+        self.scrollList.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w', padx=20)
+        self.scrollbar.config(command= self.scrollList.yview)
+
+        # Labels
+        self.colLabelsLbl = tk.Label(self.activeFrame, text="Event Name | Start Time | End Time | Level of Importance | Desc.",
+                                 font=("calibri", 10, 'bold'))
+        self.colLabelsLbl.grid(column=0, row=3, columnspan=5, sticky='w', padx=20)
+
+        self.titleLbl = tk.Label(self, text="Completed Events", font=('calabri', 15, 'bold'))
+        self.titleLbl.grid(column=1, row=0, stick='nesw')
+
+        self.errLbl = tk.Label(self.masterFrame, text="", font=("calibri", 10, 'bold'))
+        self.errLbl.grid(column=3, row=7, columnspan=2, sticky='nesw')
+
+        # Buttons
+        self.submitBtn = tk.Button(self.activeFrame, text="Back", command=lambda: self.Create_Activity())
+        self.submitBtn.grid(column=0, row=0, sticky='nesw')
+
+        # Line Graph
+        self.fig = matplotlib.Figure(figsize = (5,5), dpi = 100)
+        self.plot = self.fig.add_subplot(111)
+        self.plot.plot(Y)
+
+        self.canvas = matplotlib.FigureCanvasTkAgg(self.fig, master = self)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().grid(row=4, column=1)
 
     """Create_Activity page will ask the user to put in a value for each variable,
             which will be proceeded with a explination of an accepted value.
@@ -101,7 +167,7 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
                                  font=("calibri", 10, 'bold'))
         self.colLabelsLbl.grid(column=0, row=3, columnspan=5, sticky='w', padx=20)
 
-        self.titleLbl = tk.Label(self.masterFrame, text="Activity Screen", font=("calibri", 10, 'bold'))
+        self.titleLbl = tk.Label(self.masterFrame, text="Activity Screen", font=("calibri", 15, 'bold'))
         self.titleLbl.grid(column=2, row=0)
 
         today = date.today()
@@ -115,21 +181,28 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         self.createActivityLbl = tk.Label(self.masterFrame, text="Create New Activity", font=("calibri", 10, 'bold'))
         self.createActivityLbl.grid(column=2, row=7, sticky='nesw')
 
+        self.errLbl = tk.Label(self.masterFrame, text="", font=("calibri", 10, 'bold'))
+        self.errLbl.grid(column=3, row=7, columnspan=2, sticky='nesw')
+
         # Text Entry
         self.eventNameTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="eventName", font=("calibri", 10))
+        self.eventNameTxe.delete(0, END)
         self.eventNameTxe.insert(END, "[Event Name]")
         self.eventNameTxe.grid(column=0, row=8, sticky='nesw')
 
         self.startTimeTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="startTime", font=("calibri", 10))
+        self.startTimeTxe.delete(0, END)
         self.startTimeTxe.insert(END, "[Start Time]")
         self.startTimeTxe.grid(column=2, row=8, sticky='nesw')
 
         self.endTimeTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="endTime", font=("calibri", 10))
+        self.endTimeTxe.delete(0, END)
         self.endTimeTxe.insert(END, "[End Time]")
         self.endTimeTxe.grid(column=3, row=8, sticky='nesw')
 
         self.descTxe = tk.Entry(self.createActivityFrame, bd=2, textvariable="desc", font=("calibri", 10))
-        self.descTxe.insert(END, "[Description (option)]")
+        self.descTxe.delete(0, END)
+        self.descTxe.insert(END, "[Description (optional)]")
         self.descTxe.grid(column=0, row=9, columnspan=4, rowspan=2, sticky='nesw')
 
         # Options Menu
@@ -158,6 +231,18 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         self.endEvent = tk.Button(self.activeFrame, text="End Event", command=lambda: self.endSelectedEvent(), font=("calibri", 10, 'bold'))
         self.endEvent.grid(column=4, row=4, rowspan=3, sticky='nes')
 
+    # Delete Selected Event
+    def endSelectedEvent(self):
+        selected_checkboxs = self.scrollList.curselection()
+        start = self.scrollList.size()
+        for selected_checkbox in selected_checkboxs[::-1]:
+            self.scrollList.delete(selected_checkbox)
+        end = self.scrollList.size()
+        if(start == end):
+            self.errLbl.configure(text="Error: No Event Selected", foreground='red')
+        else:
+            self.errLbl.configure(text="")
+
     # Adds the created event into Active Activities
     def addNewEvent(self):
         eventName = self.eventNameTxe.get()
@@ -165,8 +250,26 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         endTime = self.endTimeTxe.get()
         lvlImp = self.impLvl.get()
         description = self.descTxe.get()
-        newActivity = [str(eventName), str(startTime), str(endTime), str(lvlImp), str(description)]
-        self.scrollList.insert(END, ("   |   ".join(newActivity)))
+        if(eventName != "[Event Name]" and endTime != "[End Time]"):
+            if(startTime == "[Start Time]"):
+                startTime = "-----"
+            if(description == "[Description (optional)]"):
+                description = "-----"
+            newActivity = [str(eventName), str(startTime), str(endTime), str(lvlImp), str(description)]
+            #SQLDatabase.addActivities(self, Sign_In.returnUser, Sign_In.returnPass, newActivity)
+            self.scrollList.insert(END, ("   |   ".join(newActivity)))
+        else:
+            self.errLbl.configure(text="Change Event Name or End Time", foreground='red')
+        
+        self.eventNameTxe.delete(0, END)
+        self.eventNameTxe.insert(0, "[Event Name]")
+        self.startTimeTxe.delete(0, END)
+        self.startTimeTxe.insert(0, "[Start Time]")
+        self.endTimeTxe.delete(0, END)
+        self.endTimeTxe.insert(0, "[End Time]")
+        self.impLvl.set("Low")
+        self.descTxe.delete(0, END)
+        self.descTxe.insert(0, "[Description (optional)]")
 
 
     # Add to ListView
@@ -187,11 +290,37 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         # Delete Frame
         self.deleteWidgets()
 
-        titleLbl = tk.Label(self, text="Overdue Activities")
-        titleLbl.grid(column=1, row=0)
+        # Frames
+        self.masterFrame = tk.Frame(master=self).grid(column=0, row=0, sticky='nesw')
+        self.activeFrame = tk.Frame(self.masterFrame).grid(column=0, row=1, columnspan=3, sticky='nesw')
 
-        submitBtn = tk.Button(self, text="Back", command=lambda: self.Create_Activity())
-        submitBtn.grid(column=0, row=0)
+        # Scrollbar
+        self.scrollbar = tk.Scrollbar(self.activeFrame)
+        self.scrollbar.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w')
+
+        # Add to scrollList
+        self.scrollList = tk.Listbox(self.activeFrame, yscrollcommand= self.scrollbar.set, height=10, width=60)
+        self.activeList= self.returnActivities(Sign_In.returnUser, Sign_In.returnPass)
+        self.scrollList.grid(column=0, row=4, columnspan=5, rowspan=3, sticky='w', padx=20)
+        self.scrollbar.config(command= self.scrollList.yview)
+
+        # Labels
+        self.colLabelsLbl = tk.Label(self.activeFrame, text="Event Name | Start Time | End Time | Level of Importance | Desc.",
+                                 font=("calibri", 10, 'bold'))
+        self.colLabelsLbl.grid(column=0, row=3, columnspan=5, sticky='w', padx=20)
+
+        self.titleLbl = tk.Label(self.activeFrame, text="Overdue Activities", font=("calibri", 15, 'bold'))
+        self.titleLbl.grid(column=1, row=0, sticky='w')
+
+        self.errLbl = tk.Label(self.masterFrame, text="", font=("calibri", 10, 'bold'))
+        self.errLbl.grid(column=3, row=7, columnspan=2, sticky='nesw')
+
+        # Buttons
+        self.submitBtn = tk.Button(self.activeFrame, text="Back", command=lambda: self.Create_Activity())
+        self.submitBtn.grid(column=0, row=0, sticky='nesw')
+
+        self.endEvent = tk.Button(self.activeFrame, text="End Event", command=lambda: self.endSelectedEvent(), font=("calibri", 10, 'bold'))
+        self.endEvent.grid(column=4, row=4, rowspan=3, sticky='nes')
 
 
     """Log_In page is the first page to be displayed when the application opens, and will 
@@ -304,7 +433,7 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
 
 
     # Create SQL Database
-class SQLDatabase:
+class SQLDatabase(tk.Tk):
 
     def __init__(self):
         self.con = sql.connect('ActivityTracker.db')
@@ -327,16 +456,15 @@ class SQLDatabase:
 
     def returnUserID(self, username, password):
         try:
-            con = sql.connect("ActivityTracker.db")
-            if(DB.checkTable(con, "UserInfo.db")):
-                cur = con.cursor()
+            if(DB.checkTable(DB.getConnection(self), "UserInfo.db")):
+                cur = DB.getConnection(self).cursor()
                 try:
-                    cur.execute('''SELECT UserID
+                    cur.execute("""SELECT UserID
                                 FROM UserInfo
-                                WHERE username = (?) AND password = (?)''', (username, password,))
+                                WHERE username = (?) AND password = (?)""", (str(username), str(password),))
                     ID = cur.fetchall[0]
-                    con.commit()
-                    con.close()
+                    DB.getConnection(self).commit()
+                    DB.getConnection(self).close()
                     return ID
                 except sql.OperationalError:
                     return -1
@@ -344,8 +472,20 @@ class SQLDatabase:
                 return -1
         except sql.OperationalError:
             print("ERR: UserInfo database not found...")
-            con.commit()
-            con.close()
+            cur = DB.getConnection(self).cursor()
+            try:
+                    cur.execute("""SELECT UserID
+                                FROM UserInfo
+                                WHERE username = (?) AND password = (?)""", (str(username), str(password),))
+                    ID = cur.fetchall
+                    DB.getConnection(self).commit()
+                    DB.getConnection(self).close()
+                    return ID
+            except sql.OperationalError:
+                print("ERR: No ID")
+                DB.getConnection(self).commit()
+                DB.getConnection(self).close()
+                return -1
         
 
     def loginUser(self, con, user, passW):
@@ -360,6 +500,36 @@ class SQLDatabase:
         try:
             if(DB.checkTable(con,"UserActivities.db")):
                 return DB.usersActivities(userID)
+            else:
+                return [-1]
+        except sql.OperationalError:
+            cur = con.cursor()
+            try:
+                cur.execute('''CREATE TABLE UserActivities
+                            (userID int, ActivityName text, StartTime text, EndTime text, Importance text, Desc text, status text)''')
+            except sql.OperationalError:
+                pass
+
+    def addActivities(self, username, password, list):
+        userID = self.returnUserID(username, password)
+
+        # Check/Create Tables
+        con = sql.connect("ActivityTracker.db")
+        try:
+            if(DB.checkTable(con,"UserActivities.db")):
+                name = list[0]
+                start = list[1]
+                end = list[2]
+                importance = list[3]
+                description = list[4]
+                status = DB.getStatus(end)
+                cur = con.cursor()
+                try:
+                    cur.execute("""
+                                INSERT INTO UserActivities
+                                VALUES (?, ?, ?, ?, ?, ?, ?)""", (userID, name, start, end, importance, description, status))
+                except sql.OperationalError:
+                    print("ERROR: Values incompatable")
             else:
                 return [-1]
         except sql.OperationalError:
