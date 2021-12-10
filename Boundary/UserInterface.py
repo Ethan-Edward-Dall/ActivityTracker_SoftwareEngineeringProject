@@ -3,9 +3,7 @@ from datetime import date
 import tkinter as tk
 import sqlite3 as sql
 from tkinter.constants import END, HORIZONTAL, Y
-
-import matplotlib
-
+import time
 from Control.Sign_In import Authentication
 from Control.Alter_Settings import Alter_Settings
 from Control.Complete_Event import Complete_Event
@@ -118,13 +116,13 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         self.submitBtn.grid(column=0, row=0, sticky='nesw')
 
         # Line Graph
-        self.fig = matplotlib.Figure(figsize = (5,5), dpi = 100)
-        self.plot = self.fig.add_subplot(111)
-        self.plot.plot(Y)
+        #self.fig = matplotlib.Figure(figsize = (5,5), dpi = 100)
+        #self.plot = self.fig.add_subplot(111)
+        #self.plot.plot(Y)
 
-        self.canvas = matplotlib.FigureCanvasTkAgg(self.fig, master = self)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().grid(row=4, column=1)
+        #self.canvas = matplotlib.FigureCanvasTkAgg(self.fig, master = self)
+        #self.canvas.draw()
+        #self.canvas.get_tk_widget().grid(row=4, column=1)
 
     """Create_Activity page will ask the user to put in a value for each variable,
             which will be proceeded with a explination of an accepted value.
@@ -342,6 +340,8 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
         # Delete Frame
         self.deleteWidgets()
 
+        self.errCount = 0
+
         # Labels
         self.userLbl = tk.Label(self, text="Username ", font=("calibri", 10, 'bold'))
         self.userLbl.grid(column=0, row=0, sticky='nesw')
@@ -377,7 +377,16 @@ class UserInterface(tk.Tk, Sign_In, LineGraph, DB, Create_Activity, Complete_Eve
             self.deleteWidgets()
             self.Create_Activity()
         else:
+            self.errCount+=1
             self.errLbl.configure(text="Unknown Username/Password | New?", foreground='red')
+            if(self.errCount > 4):
+                self.errLbl.configure(text="Lockout: 5min", foreground='red')
+                timestart = time.time()
+                timeend = time.time() + 3
+                while(timestart < timeend):
+                    self.submitBtn.configure(relief='sunken')
+                    time.sleep(1)
+                    timestart+= 1
 
 
 
