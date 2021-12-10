@@ -67,7 +67,7 @@ class Database:
         return active
 
     def getConnection(self):
-        return self.con
+        return sql.connect("ActivityTracker.db")
 
     def setConnection(self, dbcon):
         self.con = dbcon
